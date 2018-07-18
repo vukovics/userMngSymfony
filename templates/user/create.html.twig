@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<form action="/create" method="post">
+    <input type="text" name="name"/>
+    <input type="text" name="email"/>
+    <input type="text" name="salary"/>
+    <input type="text" name="country"/>
+    <input type="text" name="timeZone"/>
+    <button type="submit">Save</button>
+</form>
+
+
+{% endblock %}
