@@ -58,7 +58,8 @@ class UserController extends Controller
 
             $em->flush();
 
-
+            // Add flash message
+            $this->addFlash('success', 'User created!');
 
             return $this->redirectToRoute('user_list');
         }
@@ -72,25 +73,7 @@ class UserController extends Controller
 
     public function edit($id, Request $request){
 
-        $em = $this->getDoctrine()->getManager();
-
         $user = $this->getDoctrine()->getRepository(Users::class)->find($id);
-
-        if($request->getRealMethod() === 'POST'){
-
-            $params = $request->request->all();
-
-            $user->setName($params["name"]);
-            $user->setSalary($params["salary"]);
-            $user->setEmail($params["email"]);
-            $user->setTimeZone($params["timeZone"]);
-            $user->setCountry($params["country"]);
-
-            $em->persist($user);
-
-            $em->flush();
-        }
-
 
         return $this->render('user/edit.html.twig', [
             'controller_name' => 'UserController',
@@ -118,6 +101,9 @@ class UserController extends Controller
 
         $em->flush();
 
+        // Add flash message
+        $this->addFlash('success', 'User edit!');
+
         return $this->render('user/index.html.twig', [
             'controller_name' => 'UserController'
         ]);
@@ -131,6 +117,9 @@ class UserController extends Controller
         $em = $this->getDoctrine()->getManager();
         $em->remove($user);
         $em->flush();
+
+        // Add flash message
+        $this->addFlash('success', 'User deleted!');
 
         return $this->redirectToRoute('user_list');
 
