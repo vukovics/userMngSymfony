@@ -8,6 +8,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use App\Entity\Users;
 use Symfony\Component\Security\Core\User\User;
 use Symfony\Flex\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Doctrine\DBAL\Connection;
 
 class UserController extends Controller
 {
@@ -55,6 +57,8 @@ class UserController extends Controller
             $em->persist($user);
 
             $em->flush();
+
+
 
             return $this->redirectToRoute('user_list');
         }
@@ -127,6 +131,13 @@ class UserController extends Controller
         $em = $this->getDoctrine()->getManager();
         $em->remove($user);
         $em->flush();
+
+        return $this->redirectToRoute('user_list');
+
+    }
+
+    public function generateCsv()
+    {
 
         return $this->redirectToRoute('user_list');
 

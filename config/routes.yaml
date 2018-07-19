@@ -21,3 +21,7 @@ user_update:
 user_delete:
     path:     /delete/{id}
     controller: App\Controller\UserController::delete
+
+generate_csv:
+    path:     /generateCsv
+    controller: App\Controller\UserController::generateCsv

@@ -3,6 +3,7 @@
 {% block body %}
 
 <div class="container">
+<a class="btn btn-primary" href="{{ path('generate_csv') }}">Generate CSV</a>
 <table class="table">
         <thead class="thead-dark">
         <tr>
@@ -25,6 +26,7 @@
                 <td>{{ user.country }}</td>
                 <td><a class="btn btn-danger" data-toggle="modal" data-target="#delete{{ user.id }}">Delete</a></td>
                 <td><a class="btn btn-primary" href="{{ path('user_edit', {'id': user.id }) }}">Edit</a></td>
+
         </tr>
         <!-- Delete Modal -->
         <div class="modal fade" id="delete{{ user.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
