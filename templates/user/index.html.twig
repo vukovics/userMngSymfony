@@ -3,35 +3,42 @@
 {% block body %}
 
 <div class="container">
-<a class="btn btn-primary" href="{{ path('generate_csv') }}">Generate CSV</a>
-<table class="table">
-        <thead class="thead-dark">
-        <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Email</th>
-                <th scope="col">Salary</th>
-                <th scope="col">Time zone</th>
-                <th scope="col">Country</th>
-                <th scope="col">Delete</th>
-                <th scope="col">Edit</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for user in users %}
-        <tr>
-                <td>{{ user.name }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.salary }}</td>
-                <td>{{ user.timeZone }}</td>
-                <td>{{ user.country }}</td>
-                <td><a class="btn btn-danger" data-toggle="modal" data-target="#delete{{ user.id }}">Delete</a></td>
-                <td><a class="btn btn-primary" href="{{ path('user_edit', {'id': user.id }) }}">Edit</a></td>
-
-        </tr>
-        <!-- Delete Modal -->
-        <div class="modal fade" id="delete{{ user.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                        <div class="modal-content">
+    <a class="btn btn-primary" href="{{ path('generate_csv') }}">Generate CSV</a>
+    <table class="table">
+            <thead class="thead-dark">
+            <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Salary</th>
+                    <th scope="col">Time zone</th>
+                    <th scope="col">Country</th>
+                    <th scope="col">Delete</th>
+                    <th scope="col">Edit</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if users |length <= 0 %}
+                    <tr>
+                        <td>
+                          <span class="badge badge-danger">No users</span>
+                        </td>
+                    </tr>
+            {% endif %}
+            {% if users |length > 0 %}
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.salary }}</td>
+                        <td>{{ user.timeZone }}</td>
+                        <td>{{ user.country }}</td>
+                        <td><a class="btn btn-danger" data-toggle="modal" data-target="#delete{{ user.id }}">Delete</a></td>
+                        <td><a class="btn btn-primary" href="{{ path('user_edit', {'id': user.id }) }}">Edit</a></td>
+                    </tr>
+                    <!-- Delete Modal -->
+                    <div class="modal fade" id="delete{{ user.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
                                 <div class="modal-header">
                                         <h5 class="modal-title" id="exampleModalLabel">Delete user : {{ user.name }}</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -45,13 +52,15 @@
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                         <a type="button" class="btn btn-primary" href="{{ path('user_delete', {'id': user.id }) }}">Delete</a>
                                 </div>
+                            </div>
                         </div>
-                </div>
-        </div>
-        {% endfor %}
-        </tbody>
-</table>
+                    </div>
+                    {% endfor %}
+            {% endif %}
+            </tbody>
+    </table>
 </div>
+
 
 
 {% endblock %}

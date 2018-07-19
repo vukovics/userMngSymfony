@@ -2,16 +2,20 @@
 
 {% block body %}
 
-<form action="/create" method="post">
-    <input type="text" name="name"/>
-    <input type="text" name="email"/>
-    <input type="text" name="salary"/>
-    <input type="text" name="country"/>
-    <input type="text" name="timeZone"/>
-    <input type="text" name="role"/>
+{#<form action="/create" method="post">#}
+    {#<input type="text" name="name"/>#}
+    {#<input type="text" name="email"/>#}
+    {#<input type="text" name="salary"/>#}
+    {#<input type="text" name="country"/>#}
+    {#<input type="text" name="timeZone"/>#}
+    {#<input type="text" name="role"/>#}
 
-    <button type="submit">Save</button>
-</form>
+    {#<button type="submit">Save</button>#}
+{#</form>#}
+
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    {{ form_end(form) }}
 
 
 {% endblock %}

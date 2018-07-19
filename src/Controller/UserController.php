@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Roles;
 use App\Entity\UserRoles;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -12,6 +11,7 @@ use Symfony\Component\Security\Core\User\User;
 use Symfony\Flex\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Doctrine\DBAL\Connection;
+use App\Form\UsersType;
 
 class UserController extends Controller
 {
@@ -35,65 +35,44 @@ class UserController extends Controller
 
         return $this->render('user/index.html.twig', [
             'controller_name' => 'UserController',
-            'users'=>$users
+            'users'=>$users,
+
         ]);
     }
 
     public function create(Request $request)
     {
 
-        $em1 = $this->getDoctrine()->getManager();
-        $em2 = $this->getDoctrine()->getManager();
+        $em = $this->getDoctrine()->getManager();
 
-        $role = $this->getDoctrine()->getRepository(Roles::class)->find(1);
+        $form = $this->createForm(UsersType::class, []);
 
         $user= [];
+
         //IF POST REQUEST
         if($request->getRealMethod() === 'POST'){
-            $em1->getConnection()->beginTransaction();
-            $em2->getConnection()->beginTransaction();
 
-            $params = $request->request->all();
-
-            // Save user
             $user = new Users();
-            $user->setName($params["name"]);
-            $user->setSalary($params["salary"]);
-            $user->setEmail($params["email"]);
-            $user->setTimeZone($params["timeZone"]);
-            $user->setCountry($params["country"]);
 
+            $form = $this->createForm(UsersType::class, $user);
 
-            // Save user role
-            $userRole = new UserRoles();
-            $userRole->setRole($role);
-            $userRole->setUser($user);
+            $form->handleRequest($request);
 
-            //Transaction
-            try {
-                $em1->persist($user);
-                $em1->flush();
+            if ($form->isSubmitted() && $form->isValid()) {
 
-                $em2->persist($userRole);
-                $em2->flush();
+                $userData = $form->getData();
 
-                $em1->getConnection()->commit();
-                $em2->getConnection()->commit();
-            } catch (Exception $e) {
-                $em1->getConnection()->rollback();
-                $em2->getConnection()->rollback();
-                throw $e;
+                $em->persist($userData);
+                $em->flush();
+
+                $this->addFlash('success', 'User created!');
             }
-
-            // Add flash message
-            $this->addFlash('success', 'User created!');
-
-            return $this->redirectToRoute('user_list');
         }
 
         return $this->render('user/create.html.twig', [
             'controller_name' => 'UserController',
-            'user'=>$user
+            'user'=>$user,
+            'form'=> $form->createView()
         ]);
 
     }
@@ -102,9 +81,16 @@ class UserController extends Controller
 
         $user = $this->getDoctrine()->getRepository(Users::class)->find($id);
 
+        $repository = $this->getDoctrine()->getRepository(Users::class);
+
+        $users = $repository->findAll();
+
+        $form = $this->createForm(UsersType::class, $users[0]);
+
         return $this->render('user/edit.html.twig', [
             'controller_name' => 'UserController',
-            'user'=>$user
+            'user'=>$user,
+            'form'=> $form->createView()
         ]);
 
     }
@@ -140,8 +126,6 @@ class UserController extends Controller
     public function delete($id){
 
         $user = $this->getDoctrine()->getRepository(Users::class)->find($id);
-        //TODO
-        //$role = $this->getDoctrine()->getRepository(Roles::class)->findUserId($id);
 
         $em = $this->getDoctrine()->getManager();
         $em->remove($user);
