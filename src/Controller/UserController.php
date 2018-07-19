@@ -140,6 +140,8 @@ class UserController extends Controller
     public function delete($id){
 
         $user = $this->getDoctrine()->getRepository(Users::class)->find($id);
+        //TODO
+        //$role = $this->getDoctrine()->getRepository(Roles::class)->findUserId($id);
 
         $em = $this->getDoctrine()->getManager();
         $em->remove($user);
