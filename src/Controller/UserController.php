@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Roles;
+use App\Entity\UserRoles;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -40,13 +42,20 @@ class UserController extends Controller
     public function create(Request $request)
     {
 
-        $em = $this->getDoctrine()->getManager();
+        $em1 = $this->getDoctrine()->getManager();
+        $em2 = $this->getDoctrine()->getManager();
+
+        $role = $this->getDoctrine()->getRepository(Roles::class)->find(1);
+
         $user= [];
         //IF POST REQUEST
         if($request->getRealMethod() === 'POST'){
+            $em1->getConnection()->beginTransaction();
+            $em2->getConnection()->beginTransaction();
 
             $params = $request->request->all();
 
+            // Save user
             $user = new Users();
             $user->setName($params["name"]);
             $user->setSalary($params["salary"]);
@@ -54,9 +63,27 @@ class UserController extends Controller
             $user->setTimeZone($params["timeZone"]);
             $user->setCountry($params["country"]);
 
-            $em->persist($user);
 
-            $em->flush();
+            // Save user role
+            $userRole = new UserRoles();
+            $userRole->setRole($role);
+            $userRole->setUser($user);
+
+            //Transaction
+            try {
+                $em1->persist($user);
+                $em1->flush();
+
+                $em2->persist($userRole);
+                $em2->flush();
+
+                $em1->getConnection()->commit();
+                $em2->getConnection()->commit();
+            } catch (Exception $e) {
+                $em1->getConnection()->rollback();
+                $em2->getConnection()->rollback();
+                throw $e;
+            }
 
             // Add flash message
             $this->addFlash('success', 'User created!');
