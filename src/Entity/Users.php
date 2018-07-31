@@ -56,6 +56,11 @@ class Users
      */
     private $timeZone;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $roleId;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -117,6 +122,18 @@ class Users
     public function setTimeZone(string $timeZone): self
     {
         $this->timeZone = $timeZone;
+
+        return $this;
+    }
+
+    public function getRoleId(): ?int
+    {
+        return $this->roleId;
+    }
+
+    public function setRoleId(int $roleId): self
+    {
+        $this->roleId = $roleId;
 
         return $this;
     }

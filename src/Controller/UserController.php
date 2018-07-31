@@ -2,43 +2,97 @@
 
 namespace App\Controller;
 
+use App\Entity\Roles;
 use App\Entity\UserRoles;
+use App\Form\GeneratecsvType;
+use App\Form\RoleType;
+use App\Form\UploadType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use App\Entity\Users;
-use Symfony\Component\Security\Core\User\User;
-use Symfony\Flex\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Doctrine\DBAL\Connection;
 use App\Form\UsersType;
 
+/**
+ * Class UserController
+ * @package App\Controller
+ */
 class UserController extends Controller
 {
+
     /**
-     * @Route("/user", name="user")
+     * @var Connection
+     */
+    private $connection;
+
+    /**
+     * UserController constructor.
+     * @param Connection $connection
+     */
+    public function __construct(Connection $connection)
+    {
+        $this->connection = $connection;
+    }
+
+
+    /**
+     * Show users
      */
     public function index()
     {
+
         return $this->render('user/index.html.twig', [
             'controller_name' => 'UserController',
         ]);
     }
 
 
-    public function show()
+    /**
+     * Show all users
+     */
+    public function show(Request $request)
     {
 
         $repository = $this->getDoctrine()->getRepository(Users::class);
 
         $users = $repository->findAll();
 
+        $roleForm = $this->createForm(RoleType::class, []);
+
+        $generateCsvForm = $this->createForm(GeneratecsvType::class, []);
+
+        $uploadForm = $this->createForm(UploadType::class, []);
+
+        //IF POST REQUEST
+        if ($request->getRealMethod() === 'POST') {
+
+            $roleForm->handleRequest($request);
+
+            $roleInfo = $roleForm->getData();
+
+            if ($roleInfo["roleId"] !== 0) {
+                //Get users by role_id
+                $users = $this->getDoctrine()
+                    ->getRepository(Users::class)
+                    ->findBy(array('roleId' => $roleInfo["roleId"]));
+            }
+        }
+
         return $this->render('user/index.html.twig', [
             'controller_name' => 'UserController',
-            'users'=>$users,
+            'users' => $users,
+            'form' => $uploadForm->createView(),
+            'roles' => $roleForm->createView(),
+            'csvForm' => $generateCsvForm->createView()
 
         ]);
     }
+
+    /**
+     * Create new user on POST req.
+     * Show Create new user form on GET req.
+     *
+     */
 
     public function create(Request $request)
     {
@@ -47,10 +101,10 @@ class UserController extends Controller
 
         $form = $this->createForm(UsersType::class, []);
 
-        $user= [];
+        $user = [];
 
         //IF POST REQUEST
-        if($request->getRealMethod() === 'POST'){
+        if ($request->getRealMethod() === 'POST') {
 
             $user = new Users();
 
@@ -66,64 +120,90 @@ class UserController extends Controller
                 $em->flush();
 
                 $this->addFlash('success', 'User created!');
+
+                return $this->redirectToRoute('user_list');
             }
         }
 
         return $this->render('user/create.html.twig', [
             'controller_name' => 'UserController',
-            'user'=>$user,
-            'form'=> $form->createView()
+            'user' => $user,
+            'form' => $form->createView()
         ]);
 
     }
 
-    public function edit($id, Request $request){
+    /**
+     * Edit user on POST req.
+     * Edit user form on GET req.
+     */
 
-        $user = $this->getDoctrine()->getRepository(Users::class)->find($id);
+    public function edit($id, Request $request)
+    {
+
+        //IF POST REQUEST
+        if ($request->getRealMethod() === 'POST') {
+
+            $em = $this->getDoctrine()->getManager();
+
+            $user = $this->getDoctrine()->getRepository(Users::class)->find($id);
+
+            $form = $this->createForm(UsersType::class, $user);
+
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+
+                $userData = $form->getData();
+
+                $em->persist($userData);
+                $em->flush();
+
+                $this->addFlash('success', 'User updated!');
+
+                return $this->redirectToRoute('user_list');
+            }
+        }
 
         $repository = $this->getDoctrine()->getRepository(Users::class);
 
-        $users = $repository->findAll();
+        $user = $repository->find($id);
 
-        $form = $this->createForm(UsersType::class, $users[0]);
+        $form = $this->createForm(UsersType::class, $user);
 
         return $this->render('user/edit.html.twig', [
             'controller_name' => 'UserController',
-            'user'=>$user,
-            'form'=> $form->createView()
+            'user' => $user,
+            'form' => $form->createView()
         ]);
 
     }
 
+    /**
+     * Show user info
+     */
 
-    public function update(Request $request){
-
-        $em = $this->getDoctrine()->getManager();
+    public function info($id)
+    {
 
         $user = $this->getDoctrine()->getRepository(Users::class)->find($id);
 
-        $params = $request->request->all();
+        $role = $this->getDoctrine()->getRepository(Roles::class)->find($user->getRoleId());
 
-        $user->setName($params["name"]);
-        $user->setSalary($params["salary"]);
-        $user->setEmail($params["email"]);
-        $user->setTimeZone($params["timeZone"]);
-        $user->setCountry($params["country"]);
-
-        $em->persist($user);
-
-        $em->flush();
-
-        // Add flash message
-        $this->addFlash('success', 'User edit!');
-
-        return $this->render('user/index.html.twig', [
-            'controller_name' => 'UserController'
+        return $this->render('user/info.html.twig', [
+            'controller_name' => 'UserController',
+            'user' => $user,
+            'role' => $role
         ]);
 
     }
 
-    public function delete($id){
+    /**
+     * Delete user
+     */
+
+    public function delete($id)
+    {
 
         $user = $this->getDoctrine()->getRepository(Users::class)->find($id);
 
@@ -138,10 +218,4 @@ class UserController extends Controller
 
     }
 
-    public function generateCsv()
-    {
-
-        return $this->redirectToRoute('user_list');
-
-    }
 }

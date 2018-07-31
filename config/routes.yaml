@@ -14,9 +14,9 @@ user_edit:
     path:     /edit/{id}
     controller: App\Controller\UserController::edit
 
-user_update:
-    path:     /update
-    controller: App\Controller\UserController::update
+user_info:
+    path:     /info/{id}
+    controller: App\Controller\UserController::info
 
 user_delete:
     path:     /delete/{id}
@@ -24,4 +24,8 @@ user_delete:
 
 generate_csv:
     path:     /generateCsv
-    controller: App\Controller\UserController::generateCsv
+    controller: App\Controller\CsvController::generateCsv
+
+import_csv:
+    path:    /importCsv
+    controller: App\Controller\CsvController::importCsv

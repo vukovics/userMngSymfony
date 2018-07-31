@@ -2,17 +2,10 @@
 
 {% block body %}
 
-{#<form action="/update" method="post">#}
-    {#<input type="text" name="name" value="{{ user.name }}"/>#}
-    {#<input type="text" name="email" value="{{ user.email }}"/>#}
-    {#<input type="text" name="salary" value="{{ user.salary }}"/>#}
-    {#<input type="text" name="country" value="{{ user.country }}"/>#}
-    {#<input type="text" name="timeZone" value="{{ user.timeZone }}"/>#}
-    {#<button type="submit">Save</button>#}
-{#</form>#}
-
-    {{ form_start(form) }}
-    {{ form_widget(form) }}
-    {{ form_end(form) }}
+    <div class="container">
+        {{ form_start(form) }}
+        {{ form_widget(form) }}
+        {{ form_end(form) }}
+    </div>
 
 {% endblock %}
